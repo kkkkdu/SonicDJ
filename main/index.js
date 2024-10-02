@@ -32,7 +32,7 @@ for (const file of commandFile) {
 
 client.on(Events.InteractionCreate, async interaction =>{
 	if (!interaction.isChatInputCommand()) return
-	const command = interaction.client.command.get(interaction-commandName)
+	const command = interaction.client.commands.get(interaction)
 	if (!command) { 
 		console.error("Comando não encontrado") 
 		return
