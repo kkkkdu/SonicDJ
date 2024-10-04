@@ -19,9 +19,10 @@ console.log(commandPath, commandFile)
 for (const file of commandFile) {
 	const filePath = path.join(commandPath, file)
 	const commands = require(filePath)
-
+	console.log('FILE E COMANDS', filePath, commands)
 	if ("data" in commands && "execute" in commands) {
 		client.commands.set(commands.data.name, commands)
+		console.log(commands.data.name)
 
 	} else {
 		console.log(`Esse comando em ${filePath} está com 'data' ou execute ausente`)
@@ -29,9 +30,11 @@ for (const file of commandFile) {
 	console.log(commands)
 }
 
+
 client.on(Events.InteractionCreate, async interaction =>{
 	if (!interaction.isChatInputCommand()) return
-	const command = interaction.client.commands.get(interaction)
+	const command = interaction.client.commands.get(interaction.commandName)
+	console.log(interaction)
 	if (!command) { 
 		console.error("Comando não encontrado") 
 		return
