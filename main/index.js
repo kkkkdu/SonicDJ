@@ -14,7 +14,7 @@ client.commands = new Collection()
 
 const commandPath = path.join(__dirname, "commands")
 const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"))
-console.log(commandFile)
+console.log(commandPath, commandFile)
 
 for (const file of commandFile) {
 	const filePath = path.join(commandPath, file)
@@ -27,7 +27,6 @@ for (const file of commandFile) {
 		console.log(`Esse comando em ${filePath} está com 'data' ou execute ausente`)
 	}
 	console.log(commands)
-
 }
 
 client.on(Events.InteractionCreate, async interaction =>{
