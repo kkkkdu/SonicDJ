@@ -14,12 +14,10 @@ client.commands = new Collection()
 
 const commandPath = path.join(__dirname, "commands")
 const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"))
-console.log(commandPath, commandFile)
 
 for (const file of commandFile) {
 	const filePath = path.join(commandPath, file)
 	const commands = require(filePath)
-	console.log('FILE E COMANDS', filePath, commands)
 	if ("data" in commands && "execute" in commands) {
 		client.commands.set(commands.data.name, commands)
 		console.log(commands.data.name)
@@ -27,14 +25,12 @@ for (const file of commandFile) {
 	} else {
 		console.log(`Esse comando em ${filePath} está com 'data' ou execute ausente`)
 	}
-	console.log(commands)
 }
 
 
 client.on(Events.InteractionCreate, async interaction =>{
 	if (!interaction.isChatInputCommand()) return
 	const command = interaction.client.commands.get(interaction.commandName)
-	console.log(interaction)
 	if (!command) { 
 		console.error("Comando não encontrado") 
 		return
@@ -44,6 +40,7 @@ client.on(Events.InteractionCreate, async interaction =>{
 
 	}catch(error) {
 		console.error(error)
+		console.log(`Log de args e message`, args, message)
 		await interaction.reply("Houve um erro ao executar esse comando")
 	}
 } )
