@@ -1,15 +1,27 @@
-const { SlashCommandBuilder } = require("discord.js")
+const { SlashCommandBuilder, Client } = require("discord.js")
 const { execute } = require("graphql")
+const { AttachmentBuilder } = require('discord.js');
+const file = new AttachmentBuilder('../assets/discordjs.png');
 
 
-module.exports = {
-    data:  new SlashCommandBuilder()
-         .setName("play")
-         .setDescription("Adicionar música à fila"),
+module.exports = exampleEmbed = {
+        title: 'Some title',
+        image: {
+            url: 'attachment://discordjs.png',
+        },
+    
  
      async execute(interaction) {
-         console.log(interaction)
-         await interaction.reply("Musica adicionada!")
+        
+        channel.send({ embeds: [exampleEmbed], files: [file] });
+        
  
      }
  }
+
+
+ 
+
+
+
+
