@@ -12,6 +12,8 @@ client.once(Events.ClientReady, readyClient => {
 client.login(CHAVE);
 client.commands = new Collection()
 
+
+
 const commandPath = path.join(__dirname, "commands")
 const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"))
 
@@ -28,19 +30,23 @@ for (const file of commandFile) {
 }
 
 
-client.on(Events.InteractionCreate, async interaction =>{
+client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return
 	const command = interaction.client.commands.get(interaction.commandName)
-	if (!command) { 
-		console.error("Comando não encontrado") 
+	if (!command) {
+		console.error("Comando não encontrado")
 		return
 	}
-	try{
+	try {
 		await command.execute(interaction)
 
-	}catch(error) {
+	} catch (error) {
 		console.error(error)
 		console.log(`Log de args e message`, args, message)
 		await interaction.reply("Houve um erro ao executar esse comando")
 	}
-} )
+})
+
+module.exports = {
+	CHAVE,
+}
