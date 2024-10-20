@@ -3,6 +3,7 @@ const fs = require("node:fs")
 const path = require("node:path")
 
 const dotenv = require('dotenv')
+const { Player } = require('discord-player')
 dotenv.config()
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
 const client = new Client({
@@ -11,6 +12,7 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+	GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -50,11 +52,27 @@ client.on(Events.InteractionCreate, async interaction => {
 
 	} catch (error) {
 		console.error(error)
-		console.log(`Log de args e message`, args, message)
 		await interaction.reply("Houve um erro ao executar esse comando")
 	}
 })
 
-module.exports = {
-	CHAVE,
-}
+client.on('messageCreate', async (message) => {
+	if (message.author.bot) return;
+  
+	const member = message.member;
+  
+	if (!member) {
+	  return message.reply('Ocorreu um problema ao identificar você como membro do servidor.');
+	}
+	console.log(member, message)
+})  
+
+// player
+client.player = new Player(client, {
+	ytdlOptions: {
+		quality: "highestaudio",
+		highWaterMark: 1 << 25
+	}
+	
+})
+
