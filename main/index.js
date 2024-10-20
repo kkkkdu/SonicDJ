@@ -5,7 +5,15 @@ const path = require("node:path")
 const dotenv = require('dotenv')
 dotenv.config()
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
-const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
+
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 })
