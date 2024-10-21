@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require("discord.js")
 const { MessageEmbed } = require("discord.js")
 const { QueryType } = require("discord-player")
 
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("play")
@@ -31,7 +32,7 @@ module.exports = {
     )
     .addSubcommand(subcommand =>
       subcommand
-        .setName("-search")
+        .setName("search")
         .setDescription("Irá buscar por uma música")
         .addStringOption(option =>
           option
@@ -41,11 +42,19 @@ module.exports = {
         )
 
     ),
-  async execute({ client, interaction }) {
+    async execute (interaction, client) {
+
     if (!interaction.member.voice.channel) {
       return interaction.reply("Você precisa estar em um canal de voz")
     }
-    const queue = await client.player.createQueue(interaction.guild)
+
+    const queue = await createQueue(interaction.guild)
+
+    
+    if (!queue) {
+      console.error('O player não está definido!');
+      return interaction.reply('O player não está configurado ainda.');
+    }
 
     if (!queue.connection) await queue.connect(interaction.member.voice.channel)
 
@@ -112,17 +121,6 @@ module.exports = {
     await interaction.reply({
       embeds: [embed]
     })
-
-    client.on('messageCreate', async (message) => {
-      if (message.author.bot) return;
-    
-      const member = message.member;
-    
-      if (!member) {
-        return message.reply('Ocorreu um problema ao identificar você como membro do servidor.');
-      }
-    
-    });
 
   }
 
