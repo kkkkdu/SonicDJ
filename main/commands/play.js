@@ -48,7 +48,7 @@ module.exports = {
       return interaction.reply("Você precisa estar em um canal de voz")
     }
 
-    const queue = await createQueue(interaction.guild)
+    const queue = await client.player.createQueue(interaction.guild)
 
     
     if (!queue) {
