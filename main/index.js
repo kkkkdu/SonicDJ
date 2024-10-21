@@ -1,9 +1,11 @@
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js')
 const fs = require("node:fs")
 const path = require("node:path")
+const { Player } = require('discord-player')
+
+
 
 const dotenv = require('dotenv')
-const { Player } = require('discord-player')
 dotenv.config()
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
 const client = new Client({
@@ -13,16 +15,17 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
 	GatewayIntentBits.GuildMembers,
+	
+	
   ],
 });
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 })
+
 client.login(CHAVE);
 client.commands = new Collection()
-
-
 
 const commandPath = path.join(__dirname, "commands")
 const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"))
@@ -64,9 +67,7 @@ client.on('messageCreate', async (message) => {
 	if (!member) {
 	  return message.reply('Ocorreu um problema ao identificar você como membro do servidor.');
 	}
-	console.log(member, message)
-})  
-
+}) 
 // player
 client.player = new Player(client, {
 	ytdlOptions: {
