@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js")
+const { SlashCommandBuilder, EmbedBuilder, IntegrationExpireBehavior } = require("discord.js")
 const { execute } = require("graphql")
 
 const exampleEmbed = new EmbedBuilder()

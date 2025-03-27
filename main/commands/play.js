@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require("discord.js")
-const { MessageEmbed } = require("discord.js")
-const { QueryType } = require("discord-player")
+const { SlashCommandBuilder } = require("discord.js");
+const { EmbedBuilder } = require('discord.js');
+const { QueryType } = require('discord-player');
 
 
 module.exports = {
@@ -42,24 +42,20 @@ module.exports = {
         )
 
     ),
-    async execute (interaction, client) {
 
-    if (!interaction.member.voice.channel) {
+   execute: async ([ client, interaction]) => {
+    
+    
+   
+
+        if (!interaction.member.voice.channel) {
       return interaction.reply("Você precisa estar em um canal de voz")
     }
-
-    const queue = await client.player.createQueue(interaction.guild)
-
-    
-    if (!queue) {
-      console.error('O player não está definido!');
-      return interaction.reply('O player não está configurado ainda.');
-    }
-
+   const queue = await client.player.nodes.create(interaction.guild)
+   console.log(queue)
     if (!queue.connection) await queue.connect(interaction.member.voice.channel)
 
-    let embed = new MessageEmbed()
-
+      let embed = new EmbedBuilder()
     if (interaction.options.getSubcommand() == "song") {
       let url = interaction.options.getString("url")
 
@@ -67,32 +63,28 @@ module.exports = {
         requestedBy: interaction.user,
         searchEngine: QueryType.YOUTUBE_VIDEO
       })
+      
       if (result.tracks.length === 0) {
-        await interaction.reply("Sem resultado")
-        return
+        return interaction.reply("Sem resultado")        
       }
-
       const song = result.tracks[0]
+      console.log(song)
       await queue.addTrack(song)
-
       embed
-        .setDescription(`Adicionada **[${song.title}] (${song.url})** à fila`)
-        .setThumbnail(song.thumbnail)
-        .setFooter({ text: `Duration ${song.duration}` })
+            .setDescription(`Adicionada **[${song.title}] (${song.url})** à fila`)
+            .setThumbnail(song.thumbnail)
+            .setFooter({ text: `Duration ${song.duration}` })
     }
     else if (interaction.options.getSubcommand() === "playlist") {
 
       let url = interaction.options.getString("url")
       const result = await client.player.search(url, {
         requestedBy: interaction.user,
-        searchEngine: QueryType.YOUTUBE_PLAYLIST
+        searchEngine: Player.YOUTUBE_PLAYLIST
       })
-
       if (result.tracks.length === 0) {
         return interaction.reply(`Nenhuma playlist encontrada ${url}`)
       }
-
-
       const playlist = result.playlist
       await queue.addTracks(result.tracks)
       embed
@@ -100,6 +92,7 @@ module.exports = {
         .setThumbnail(playlist.thumbnail)
 
     }
+    
     else if (interaction.options.getSubcommand() === "search") {
 
 
@@ -110,29 +103,20 @@ module.exports = {
       })
       if (result.tracks.length === 0)
         return interaction.editReply("Sem resultados para a busca")
+
       const song = result.tracks[0]
       await queue.addTrack(song)
-      embed
+      embed        
         .setDescription(`**[${song.title}](${song.url})** foi adicionada a fila`)
         .setThumbnail(song.thumbnail)
         .setFooter({ text: `Duration: ${song.duration}` })
-    }
-    if (!queue.playing) await queue.play()
-    await interaction.reply({
-      embeds: [embed]
-    })
+      }
+      
+      if (!queue.playing) await queue.play()
+        await interaction.reply({
+          embeds: [embed]  
+        })
 
-  }
-
+  },
 }
-
-
-
-
-
-
-
-
-
-
 
