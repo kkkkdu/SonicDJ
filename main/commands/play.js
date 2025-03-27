@@ -82,6 +82,7 @@ module.exports = {
         requestedBy: interaction.user,
         searchEngine: Player.YOUTUBE_PLAYLIST
       })
+      console.log(embed)
       if (result.tracks.length === 0) {
         return interaction.reply(`Nenhuma playlist encontrada ${url}`)
       }

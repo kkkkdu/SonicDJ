@@ -76,3 +76,12 @@ client.on('messageCreate', async (message) => {
 
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
 client.login(CHAVE);
+
+/*
+
+ENV da vez
+CHAVE=MTI4NjQxNjM5ODQyMzQyNTAzNw.GKjsoQ.WqAeNmS9tShb0EnbmQdNdNMhkbPc1CMRy9HJy0
+CLIENT_ID=1286416398423425037
+GUILD_ID=1000496025905135768
+
+*/
