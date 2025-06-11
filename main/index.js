@@ -25,7 +25,7 @@ const client = new Client({
 
 client.commands = new Collection()
 const commandPath = path.join(__dirname, "commands")
-const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"))
+const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".js")) 
 
 for (const file of commandFile) {
 	const filePath = path.join(commandPath, file)
@@ -36,7 +36,6 @@ for (const file of commandFile) {
 	if ("data" in commands && "execute" in commands) {
 		client.commands.set(commands.data.name, commands)
 		console.log(commands.data.name)
-		console.log(commands.data.name)
 
 	} else {
 		console.log(`Esse comando em ${filePath} estao com 'data' ou execute ausente`)
@@ -44,33 +43,34 @@ for (const file of commandFile) {
 }
 
 client.player = new Player(client, {
-	ytdlOptions: {
-		quality: 'highestaudio',
-		highWaterMark: 1 << 25
-	},
-	ffmpeg: {
-		path: 'C:\\MediaTools\\ffmpeg\\bin\\ffmpeg.exe',
-		args: [
-			'-loglevel', '0',
-			'-ar', '48000',
-			'-ac', '2',
-			'-ab', '192k',
-			'-f', 'mp3',
-			'-i', 'pipe:0',
-		]
-	},
-});
+   ytdlOptions: {
+        quality: 'highestaudio',
+        highWaterMark: 1 << 25
+    },     
+		 ffmpeg: { 
+        path: 'C:\\MediaTools\\ffmpeg\\bin\\ffmpeg.exe',
+        args: [
+            '-loglevel', '0',
+            '-ar', '48000',
+            '-ac', '2',
+            '-ab', '192k',
+            '-f', 'mp3',
+            '-i', 'pipe:0',
+        ]
+    }, 
+	});
 await client.player.extractors.loadDefault()
 console.log("Extratores do Discord Player carregados com sucesso!");
-try {
+	try{
 	client.player.extractors.register(YoutubeiExtractor, {})
-	console.log("YoutubeExtractor padrão Registrado")
-} catch (e) {
-	console.warn("Falha ao registrar o YoutbeExtractor")
-}
+		console.log("YoutubeExtractor padr�o Registrado")
+	}catch(e){
+		console.warn("Falha ao registrar o YoutbeExtractor")
+	}
 client.player.extractors.register(YoutubeiExtractor);
-console.log("YoutubeiExtractor registrado.");
+    console.log("YoutubeiExtractor registrado.");
 
+		
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 })
@@ -78,7 +78,7 @@ client.once(Events.ClientReady, readyClient => {
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return
-
+	
 	const command = interaction.client.commands.get(interaction.commandName)
 	if (!command) {
 		console.error("Comando nao encontrado")
@@ -86,10 +86,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 	try {
 		await command.execute([client, interaction])
-	try {
-		await command.execute([client, interaction])
 
-	} catch (error) {
 	} catch (error) {
 		console.error(error)
 		await interaction.reply("Houve um erro ao executar esse comando")
@@ -98,12 +95,12 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.on('messageCreate', async (message) => {
 	if (message.author.bot) return;
-
+  
 	const member = message.member;
-
+  
 	if (!member) {
-		return message.reply('Ocorreu um problema ao identificar voce como membro do servidor.');
+	  return message.reply('Ocorreu um problema ao identificar voce como membro do servidor.');
 	}
-})
+}) 
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
 client.login(CHAVE);
