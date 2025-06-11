@@ -36,6 +36,7 @@ for (const file of commandFile) {
 	if ("data" in commands && "execute" in commands) {
 		client.commands.set(commands.data.name, commands)
 		console.log(commands.data.name)
+		console.log(commands.data.name)
 
 	} else {
 		console.log(`Esse comando em ${filePath} estao com 'data' ou execute ausente`)
@@ -85,7 +86,10 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 	try {
 		await command.execute([client, interaction])
+	try {
+		await command.execute([client, interaction])
 
+	} catch (error) {
 	} catch (error) {
 		console.error(error)
 		await interaction.reply("Houve um erro ao executar esse comando")
