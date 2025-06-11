@@ -1,14 +1,11 @@
-const { SlashCommandBuilder } = require("discord.js")
-const { execute } = require("graphql")
+import { SlashCommandBuilder } from "discord.js"
 
-
-module.exports = {
-   data:  new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
         .setName("ping")
-        .setDescription("PONG!"),
+        .setDescription("PONG!")
 
-    async execute(interaction) {
+    export async function execute([client, interaction]) {
+        
         await interaction.reply("PONG!")
 
     }
-}

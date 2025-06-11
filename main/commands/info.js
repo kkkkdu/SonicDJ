@@ -1,5 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, IntegrationExpireBehavior } = require("discord.js")
-const { execute } = require("graphql")
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'
 
 const exampleEmbed = new EmbedBuilder()
 .setColor(0x17569b)
@@ -10,21 +9,24 @@ const exampleEmbed = new EmbedBuilder()
 .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP5KwuGyF4gkJ59GuDw9EPtfQdr6jMulyaKA&s')
 .addFields(
     { name: 'Segue as infos do bot bro', value: 'Infos do bot:' },
-    // { name: '\u200B', value: '\u200B' },
-    // { name: 'Inline field title', value: 'Some value here', inline: true },
 )
 .setImage('https://m.media-amazon.com/images/I/41lxaqxy8oL._UXNaN_FMjpg_QL85_.jpg')
 .setTimestamp(Date.now())
 .setFooter({ text: 'SonicHeroes', iconURL: 'https://m.media-amazon.com/images/I/41lxaqxy8oL._UXNaN_FMjpg_QL85_.jpg' });
 
-module.exports = {
-    data: new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
         .setName("info")
-        .setDescription("Descrição e git commands!"),
+        .setDescription("Descricao e commands!")
 
-    async execute(interaction) {
-        console.log(interaction)
-        await interaction.channel.send({ embeds: [exampleEmbed] })
+    export async function execute([client,interaction]) {
+        const commandList = client.commands.map(command => {
+        return `\`/${command.data.name}\`: ${command.data.description}`;
+    }).join('\n')
 
-    }
+    exampleEmbed.setFields([
+        { name: 'Segue as infos do bot bro', value: commandList, inline: false },
+    ]);
+        await interaction.reply({ embeds: [exampleEmbed] }); 
 }
+
+    

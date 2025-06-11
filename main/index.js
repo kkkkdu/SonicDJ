@@ -1,10 +1,17 @@
-const dotenv = require('dotenv')
+import { Client, Events, GatewayIntentBits, Collection } from 'discord.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { Player } from 'discord-player'
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+import { YouTubeExtractor } from '@discord-player/extractor'
+import { YoutubeiExtractor } from "discord-player-youtubei"
+
 dotenv.config()
 
-const { Client, Events, GatewayIntentBits, Collection } = require('discord.js')
-const fs = require("node:fs")
-const path = require("node:path")
-const { Player } = require("discord-player")
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const client = new Client({
 	intents: [
@@ -14,7 +21,7 @@ const client = new Client({
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMembers,
 	],
-});
+})
 
 client.commands = new Collection()
 const commandPath = path.join(__dirname, "commands")
@@ -22,25 +29,48 @@ const commandFile = fs.readdirSync(commandPath).filter(file => file.endsWith(".j
 
 for (const file of commandFile) {
 	const filePath = path.join(commandPath, file)
-	const commands = require(filePath)
+	const { createRequire } = await import('node:module')
+	const requireLocal = createRequire(import.meta.url)
+	const commands = requireLocal(filePath)
+
 	if ("data" in commands && "execute" in commands) {
 		client.commands.set(commands.data.name, commands)
 		console.log(commands.data.name)
 
 	} else {
-		console.log(`Esse comando em ${filePath} está com 'data' ou execute ausente`)
+		console.log(`Esse comando em ${filePath} estao com 'data' ou execute ausente`)
 	}
 }
 
 client.player = new Player(client, {
-	ytdlOptions: {
-		quality: 'highestaudio',
+   ytdlOptions: {
+        quality: 'highestaudio',
         highWaterMark: 1 << 25
-    }
-})
+    },     
+		 ffmpeg: { 
+        path: 'C:\\MediaTools\\ffmpeg\\bin\\ffmpeg.exe',
+        args: [
+            '-loglevel', '0',
+            '-ar', '48000',
+            '-ac', '2',
+            '-ab', '192k',
+            '-f', 'mp3',
+            '-i', 'pipe:0',
+        ]
+    }, 
+	});
+await client.player.extractors.loadDefault()
+console.log("Extratores do Discord Player carregados com sucesso!");
+	try{
+	client.player.extractors.register(YoutubeiExtractor, {})
+		console.log("YoutubeExtractor padr�o Registrado")
+	}catch(e){
+		console.warn("Falha ao registrar o YoutbeExtractor")
+	}
+client.player.extractors.register(YoutubeiExtractor);
+    console.log("YoutubeiExtractor registrado.");
 
-
-
+		
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 })
@@ -51,7 +81,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	
 	const command = interaction.client.commands.get(interaction.commandName)
 	if (!command) {
-		console.error("Comando não encontrado")
+		console.error("Comando nao encontrado")
 		return
 	}
 	try {
@@ -69,19 +99,8 @@ client.on('messageCreate', async (message) => {
 	const member = message.member;
   
 	if (!member) {
-	  return message.reply('Ocorreu um problema ao identificar você como membro do servidor.');
+	  return message.reply('Ocorreu um problema ao identificar voce como membro do servidor.');
 	}
 }) 
-
-
 const { CHAVE, CLIENT_ID, GUILD_ID } = process.env
 client.login(CHAVE);
-
-/*
-
-ENV da vez
-CHAVE=MTI4NjQxNjM5ODQyMzQyNTAzNw.GKjsoQ.WqAeNmS9tShb0EnbmQdNdNMhkbPc1CMRy9HJy0
-CLIENT_ID=1286416398423425037
-GUILD_ID=1000496025905135768
-
-*/

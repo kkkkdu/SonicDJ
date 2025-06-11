@@ -1,13 +1,10 @@
-const { SlashCommandBuilder } = require ("discord.js")
-const { MessageEmbed } = require ("discord.js")
+import { SlashCommandBuilder } from 'discord.js'
 
-
-module.exports = {
-    data : new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
         .setName("continue")
-        .setDescription("Retomar a música"),
+        .setDescription("Retomar a música")
         
-        async execute ({client, interaction}) {
+        export async function execute ({client, interaction}) {
             const queue = client.player.getQeue(interaction.guild)
 
             if(!queue){
@@ -19,4 +16,3 @@ module.exports = {
             await interaction.reply("A Música foi retomada")
         }
         
-}

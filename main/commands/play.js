@@ -1,123 +1,164 @@
-const { SlashCommandBuilder } = require("discord.js");
-const { EmbedBuilder } = require('discord.js');
-const { QueryType } = require('discord-player');
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'
+import { QueryType, useMainPlayer } from 'discord-player'
 
 
-module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("play")
-    .setDescription("Adicionar músicas ao Bot!")
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("musica")
-        .setDescription("Tocar musicas do youtube")
-        .addStringOption(option =>
-          option
-            .setName("url")
-            .setDescription("Insira Url da música")
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("playlist")
-        .setDescription("Tocar playlists do YT")
-        .addStringOption(option =>
-          option
-            .setName("url")
-            .setDescription("playlist url")
-            .setRequired(true)
+export const data = new SlashCommandBuilder()
+  .setName("play")
+  .setDescription("Adicionar musicas ao Bot!")
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("song")
+      .setDescription("Tocar musicas do youtube")
+      .addStringOption(option =>
+        option
+          .setName("url")
+          .setDescription("Insira Url da musica")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("playlist")
+      .setDescription("Tocar playlists do YT")
+      .addStringOption(option =>
+        option
+          .setName("url")
+          .setDescription("playlist url")
+          .setRequired(true)
 
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("search")
-        .setDescription("Irá buscar por uma música")
-        .addStringOption(option =>
-          option
-            .setName("chaves")
-            .setDescription("Buscar palavras Chaves")
-            .setRequired(true)
-        )
+      )
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("search")
+      .setDescription("Ira buscar por uma musica")
+      .addStringOption(option =>
+        option
+          .setName("chaves")
+          .setDescription("Buscar palavras Chaves")
+          .setRequired(true)
+      )
 
-    ),
-
-   execute: async ([ client, interaction]) => {
-    
-    
-   
-
-        if (!interaction.member.voice.channel) {
-      return interaction.reply("Você precisa estar em um canal de voz")
+  )
+  
+export async function execute([client, interaction]) {
+    if (!interaction.member.voice.channel) {
+        return interaction.reply({ content: "Voce precisa estar em um canal de voz para usar este comando!", ephemeral: true });
     }
-   const queue = await client.player.nodes.create(interaction.guild)
-   console.log(queue)
-    if (!queue.connection) await queue.connect(interaction.member.voice.channel)
 
-      let embed = new EmbedBuilder()
-    if (interaction.options.getSubcommand() == "song") {
-      let url = interaction.options.getString("url")
+    await interaction.deferReply({ ephemeral: true });
+    
+    const player = client.player; 
 
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        searchEngine: QueryType.YOUTUBE_VIDEO
-      })
-      
-      if (result.tracks.length === 0) {
-        return interaction.reply("Sem resultado")        
-      }
-      const song = result.tracks[0]
-      console.log(song)
-      await queue.addTrack(song)
-      embed
-            .setDescription(`Adicionada **[${song.title}] (${song.url})** à fila`)
-            .setThumbnail(song.thumbnail)
-            .setFooter({ text: `Duration ${song.duration}` })
+    let embed = new EmbedBuilder();
+
+    if (interaction.options.getSubcommand() === "song") {
+        let url = interaction.options.getString("url");
+
+        console.log("--- 'SONG' ---");
+        console.log("URL recebida :", url);
+        try {
+            const { track, queue: updatedQueue } = await player.play(interaction.member.voice.channel, url, {
+                member: interaction.member,
+                textChannel: interaction.channel, 
+                interaction: interaction, 
+                nodeOptions: {
+                    metadata: interaction.channel, 
+                },
+                searchEngine: QueryType.YOUTUBE_VIDEO 
+            });
+
+            
+            if (!track) {
+                console.log("Player nao encontrou ou adicionou uma faixa para a URL fornecida.");
+                return interaction.editReply("❌Não foi possível encontrar a música com a URL fornecida.❌");
+            }
+
+            const song = track;
+            console.log(" Música encontrada :", song);
+            
+            embed
+                .setDescription(`🎶**Adicionada a fila 
+                    [${song.title}](${song.url})** `)
+                .setColor('#3061e3')
+                .setImage(song.thumbnail)
+                .setFooter({ text: `⏱️ Duracao: [${song.duration}]` })
+            
+            await interaction.editReply({ embeds: [embed] });
+
+        } catch (error) {
+            console.error(" Erro no bloco try/catch do play (song):", error);
+           
+            await interaction.editReply(`Ocorreu um erro ao tocar a música: \`${error.message}\`. Verifique a URL ou tente novamente.`);
+        }
     }
+
     else if (interaction.options.getSubcommand() === "playlist") {
+        let url = interaction.options.getString("url");
+        const player = client.player;
 
-      let url = interaction.options.getString("url")
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        searchEngine: Player.YOUTUBE_PLAYLIST
-      })
-      console.log(embed)
-      if (result.tracks.length === 0) {
-        return interaction.reply(`Nenhuma playlist encontrada ${url}`)
-      }
-      const playlist = result.playlist
-      await queue.addTracks(result.tracks)
-      embed
-        .setDescription(`**${result.tracks.length} músicas de [${playlist.title}](${playlist.url})** foram adicionadas à fila`)
-        .setThumbnail(playlist.thumbnail)
+        console.log("--- INÍCIO DO SUBCONANDO 'PLAYLIST' ---");
+        try {
+            const { tracks, playlist, queue: updatedQueue } = await player.play(interaction.member.voice.channel, url, {
+                member: interaction.member,
+                textChannel: interaction.channel,
+                interaction: interaction,
+                nodeOptions: {
+                    metadata: interaction.channel,
+                },
+                searchEngine: QueryType.YOUTUBE_PLAYLIST
+            });
 
+            if (!tracks || tracks.length === 0) {
+                return interaction.editReply(`✅ Playlist encontrada: ${url}`);
+            }
+
+            embed
+                .setDescription(`**${tracks.length} músicas de [${playlist.title}](${playlist.url})** foram adicionadas à fila`)
+                .setColor('#3061e3')
+                .setImage(playlist.thumbnail)
+                .setFooter({ text: `⏱️ Duração Total: ${playlist.durationFormatted}` })
+
+            await interaction.editReply({ embeds: [embed] });
+
+        } catch (error) {
+            console.error("ERRO CAPTURADO no bloco try/catch do play (playlist):", error);
+            await interaction.editReply("💥 Ocorreu um erro ao tocar a playlist");
+        }
+        console.log(" --- FIM DO SUBCONANDO 'PLAYLIST' ---");
     }
-    
+
     else if (interaction.options.getSubcommand() === "search") {
+        let query = interaction.options.getString("chaves");
+        const player = client.player;
 
+        console.log("DEBUG: --- INÍCIO DO SUBCONANDO 'SEARCH' ---");
+        try {
+            const { track, queue: updatedQueue } = await player.play(interaction.member.voice.channel, query, {
+                member: interaction.member,
+                textChannel: interaction.channel,
+                interaction: interaction,
+                nodeOptions: {
+                    metadata: interaction.channel,
+                },
+                searchEngine: QueryType.AUTO
+            });
 
-      let url = interaction.options.getString("chaves")
-      const result = await client.player.search(url, {
-        requestedBy: interaction.user,
-        searchEngine: QueryType.AUTO
-      })
-      if (result.tracks.length === 0)
-        return interaction.editReply("Sem resultados para a busca")
+            if (!track) {
+                return interaction.editReply("Sem resultados para a busca.");
+            }
 
-      const song = result.tracks[0]
-      await queue.addTrack(song)
-      embed        
-        .setDescription(`**[${song.title}](${song.url})** foi adicionada a fila`)
-        .setThumbnail(song.thumbnail)
-        .setFooter({ text: `Duration: ${song.duration}` })
-      }
-      
-      if (!queue.playing) await queue.play()
-        await interaction.reply({
-          embeds: [embed]  
-        })
+            embed
+                .setDescription(`**[${track.title}](${track.url})** foi adicionada à fila`)
+                .setThumbnail(track.thumbnail)
+                .setFooter({ text: `Duração: ${song.duration}` });
 
-  },
+            await interaction.editReply({ embeds: [embed] });
+
+        } catch (error) {
+            console.error("DEBUG: ERRO CAPTURADO no bloco try/catch do play (search):", error);
+            await interaction.editReply("Ocorreu um erro ao buscar e tocar a música. Por favor, verifique sua pesquisa ou tente novamente.");
+        }
+        console.log("DEBUG: --- FIM DO SUBCONANDO 'SEARCH' ---");
+    }
 }
-

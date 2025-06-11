@@ -1,30 +1,30 @@
-const { SlashCommandBuilder } = require ("discord.js")
-const { MessageEmbed } = require ("discord.js")
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'
+
+export const data = new SlashCommandBuilder()
+    .setName("skip")
+    .setDescription("Pular musica atual")
+
+export async function execute([client, interaction]) {
+    await interaction.deferReply({ ephemeral: false })
+    const queue = client.player.nodes.get(interaction.guild.id);
 
 
-module.exports = {
-    data : new SlashCommandBuilder()
-        .setName("skip")
-        .setDescription("Pular música atual"),
-        
-        async execute (client, interaction) {
-            const queue = client.player.getQeue(interaction.guild)
+    if (!queue || queue.tracks.data.length === 0) {
+        return interaction.editReply('Não há músicas na fila para pular.');
+    }
+    if (!queue.currentTrack) {
+        return interaction.editReply('Não há músicas tocando no momento para pular.');
+    }
+     const skippedTrack = queue.currentTrack; 
+    queue.node.skip();
 
-            if(!queue){
-                await interaction.reply("Não há música na fila")
-                return
-            }
-            const currentSong = queue.current
-            queue.skip()
 
-            await interaction.reply({
-                embeds: [
-                    new MessageEmbed()
-                        .setDescription(`Skipped **${currentSong.title}**`)
-                        .setThumbnail(currentSong.thumbnail)
-                ]
-            })
+const embed = new EmbedBuilder()
+        .setDescription(`â�­ï¸� Pulei a mÃºsica **[${skippedTrack.title}](${skippedTrack.url})**!`)
+        .setImage(skippedTrack.thumbnail)
+        .setColor('Blue')
 
-        }
-        
+    await interaction.editReply({ embeds: [embed] });
+
 }
+
