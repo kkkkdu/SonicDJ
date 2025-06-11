@@ -20,7 +20,7 @@ export async function execute([client, interaction]) {
 
 
 const embed = new EmbedBuilder()
-        .setDescription(`â�­ï¸� Pulei a mÃºsica **[${skippedTrack.title}](${skippedTrack.url})**!`)
+        .setDescription(`⏩ Pulei a música **[${skippedTrack.title}](${skippedTrack.url})**!`)
         .setImage(skippedTrack.thumbnail)
         .setColor('Blue')
 

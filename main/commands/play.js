@@ -3,52 +3,52 @@ import { QueryType, useMainPlayer } from 'discord-player'
 
 
 export const data = new SlashCommandBuilder()
-  .setName("play")
-  .setDescription("Adicionar musicas ao Bot!")
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("song")
-      .setDescription("Tocar musicas do youtube")
-      .addStringOption(option =>
-        option
-          .setName("url")
-          .setDescription("Insira Url da musica")
-          .setRequired(true)
-      )
-  )
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("playlist")
-      .setDescription("Tocar playlists do YT")
-      .addStringOption(option =>
-        option
-          .setName("url")
-          .setDescription("playlist url")
-          .setRequired(true)
+    .setName("play")
+    .setDescription("Adicionar musicas ao Bot!")
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("song")
+            .setDescription("Tocar musicas do youtube")
+            .addStringOption(option =>
+                option
+                    .setName("url")
+                    .setDescription("Insira Url da musica")
+                    .setRequired(true)
+            )
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("playlist")
+            .setDescription("Tocar playlists do YT")
+            .addStringOption(option =>
+                option
+                    .setName("url")
+                    .setDescription("playlist url")
+                    .setRequired(true)
 
-      )
-  )
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("search")
-      .setDescription("Ira buscar por uma musica")
-      .addStringOption(option =>
-        option
-          .setName("chaves")
-          .setDescription("Buscar palavras Chaves")
-          .setRequired(true)
-      )
+            )
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("search")
+            .setDescription("Ira buscar por uma musica")
+            .addStringOption(option =>
+                option
+                    .setName("chaves")
+                    .setDescription("Buscar palavras Chaves")
+                    .setRequired(true)
+            )
 
-  )
-  
+    )
+
 export async function execute([client, interaction]) {
     if (!interaction.member.voice.channel) {
         return interaction.reply({ content: "Voce precisa estar em um canal de voz para usar este comando!", ephemeral: true });
     }
 
     await interaction.deferReply({ ephemeral: true });
-    
-    const player = client.player; 
+
+    const player = client.player;
 
     let embed = new EmbedBuilder();
 
@@ -57,18 +57,27 @@ export async function execute([client, interaction]) {
 
         console.log("--- 'SONG' ---");
         console.log("URL recebida :", url);
+
+        console.log("URL IMEDIATAMENTE antes de player.play:", url);
+        try {
+            const { track, queue: updatedQueue } = await player.play(interaction.member.voice.channel, url, { /* ... */ });
+            // ...
+        } catch (error) {
+            console.error("Erro no bloco try/catch do play (song):", error);
+            // ...
+        }
         try {
             const { track, queue: updatedQueue } = await player.play(interaction.member.voice.channel, url, {
                 member: interaction.member,
-                textChannel: interaction.channel, 
-                interaction: interaction, 
+                textChannel: interaction.channel,
+                interaction: interaction,
                 nodeOptions: {
-                    metadata: interaction.channel, 
+                    metadata: interaction.channel,
                 },
-                searchEngine: QueryType.YOUTUBE_VIDEO 
+                searchEngine: QueryType.YOUTUBE_VIDEO
             });
 
-            
+
             if (!track) {
                 console.log("Player nao encontrou ou adicionou uma faixa para a URL fornecida.");
                 return interaction.editReply("❌Não foi possível encontrar a música com a URL fornecida.❌");
@@ -76,19 +85,19 @@ export async function execute([client, interaction]) {
 
             const song = track;
             console.log(" Música encontrada :", song);
-            
+
             embed
                 .setDescription(`🎶**Adicionada a fila 
                     [${song.title}](${song.url})** `)
                 .setColor('#3061e3')
                 .setImage(song.thumbnail)
                 .setFooter({ text: `⏱️ Duracao: [${song.duration}]` })
-            
+
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
             console.error(" Erro no bloco try/catch do play (song):", error);
-           
+
             await interaction.editReply(`Ocorreu um erro ao tocar a música: \`${error.message}\`. Verifique a URL ou tente novamente.`);
         }
     }
